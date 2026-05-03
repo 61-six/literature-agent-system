@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业文献智能整理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .main-content {
+            display: flex;
+            min-height: calc(100vh - 200px);
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .sidebar h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            background: #e9ecef;
+        }
+
+        .nav-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-item .icon {
+            font-size: 18px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .upload-zone {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: #f8f9ff;
+        }
+
+        .upload-zone:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-zone .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .upload-zone h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .upload-zone p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .document-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .document-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .document-item:hover {
+            background: #e9ecef;
+            transform: translateX(4px);
+        }
+
+        .document-item h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .document-item .meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .document-item .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .keyword-tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .category-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .category-name {
+            width: 150px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .category-bar-container {
+            flex: 1;
+            height: 24px;
+            background: #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .category-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            transition: width 0.5s ease;
+        }
+
+        .category-count {
+            width: 50px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e9ecef;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-container {
+            margin-top: 20px;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .progress-step .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 14px;
+        }
+
+        .progress-step.completed .step-icon {
+            background: #28a745;
+            color: white;
+        }
+
+        .progress-step.active .step-icon {
+            background: #667eea;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .progress-step .step-name {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+        }
+
+        .toast.success {
+            background: #28a745;
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section h4 {
+            font-size: 14px;
+            color: #667eea;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .detail-section p {
+            color: #333;
+            line-height: 1.8;
+        }
+
+        .abstract-preview {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            line-height: 1.8;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .result-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-preview.active {
+            display: block;
+        }
+
+        .result-preview h3 {
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 企业文献智能整理系统</h1>
+            <p>基于多Agent协作的智能文献处理平台 | 自动分类 | 深度摘要 | 关联分析</p>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3>导航菜单</h3>
+                <div class="nav-item active" data-section="upload">
+                    <span class="icon">📤</span>
+                    <span>上传文档</span>
+                </div>
+                <div class="nav-item" data-section="documents">
+                    <span class="icon">📄</span>
+                    <span>文档列表</span>
+                </div>
+                <div class="nav-item" data-section="search">
+                    <span class="icon">🔍</span>
+                    <span>文档搜索</span>
+                </div>
+                <div class="nav-item" data-section="statistics">
+                    <span class="icon">📊</span>
+                    <span>统计信息</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <div id="uploadSection" class="section active">
+                    <div class="card">
+                        <h2>📤 上传并处理文档</h2>
+                        <div class="upload-zone" id="uploadZone">
+                            <div class="icon">📁</div>
+                            <h3>点击或拖拽文件到此处上传</h3>
+                            <p>支持 PDF、Word、TXT、图片（OCR识别）等多种格式</p>
+                        </div>
+                        <input type="file" id="fileInput" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg,.tiff">
+
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>摘要类型</label>
+                            <select id="summaryType">
+                                <option value="brief">简短摘要 (100-200字)</option>
+                                <option value="standard" selected>标准摘要 (300-500字)</option>
+                                <option value="detailed">详细摘要 (800-1500字)</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-primary" id="processBtn" style="display: none;">
+                            <span>⚙️</span> 开始处理
+                        </button>
+
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p>正在处理文档，请稍候...</p>
+                        </div>
+
+                        <div class="progress-container" id="progressContainer" style="display: none;">
+                            <div class="progress-step" id="step1">
+                                <div class="step-icon">1</div>
+                                <div class="step-name">预处理（格式转换、OCR识别）</div>
+                            </div>
+                            <div class="progress-step" id="step2">
+                                <div class="step-icon">2</div>
+                                <div class="step-name">分类标注（自动分类、关键词提取）</div>
+                            </div>
+                            <div class="progress-step" id="step3">
+                                <div class="step-icon">3</div>
+                                <div class="step-name">摘要提取（深度信息抽取）</div>
+                            </div>
+                            <div class="progress-step" id="step4">
+                                <div class="step-icon">4</div>
+                                <div class="step-name">关联分析（技术脉络梳理）</div>
+                            </div>
+                        </div>
+
+                        <div class="result-preview" id="resultPreview">
+                            <h3>✅ 处理完成</h3>
+                            <div id="resultContent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="documentsSection" class="section">
+                    <div class="card">
+                        <h2>📄 文档列表</h2>
+                        <div class="document-list" id="documentList">
+                            <p style="color: #666; text-align: center; padding: 40px;">暂无文档，请先上传文档</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="searchSection" class="section">
+                    <div class="card">
+                        <h2>🔍 文档搜索</h2>
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="输入关键词搜索文档...">
+                            <button class="btn btn-primary" id="searchBtn">搜索</button>
+                        </div>
+                        <div class="document-list" id="searchResults">
+                            <p style="color: #666; text-align: center; padding: 40px;">输入关键词开始搜索</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="statisticsSection" class="section">
+                    <div class="card">
+                        <h2>📊 统计信息</h2>
+                        <div class="stats-grid" id="statsGrid">
+                            <div class="stat-card">
+                                <div class="number" id="totalDocs">0</div>
+                                <div class="label">总文档数</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="number" id="totalKeywords">0</div>
+                                <div class="label">总关键词数</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="number" id="avgKeywords">0</div>
+                                <div class="label">平均关键词/文档</div>
+                            </div>
+                        </div>
+
+                        <h3 style="margin: 30px 0 20px; color: #333;">分类分布</h3>
+                        <div class="category-chart" id="categoryChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="modal" id="documentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">文档详情</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentFile = null;
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+                this.classList.add('active');
+                const sectionId = this.dataset.section + 'Section';
+                document.getElementById(sectionId).classList.add('active');
+
+                if (this.dataset.section === 'documents') {
+                    loadDocuments();
+                } else if (this.dataset.section === 'statistics') {
+                    loadStatistics();
+                }
+            });
+        });
+
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const processBtn = document.getElementById('processBtn');
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#764ba2';
+            uploadZone.style.background = '#f0f2ff';
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.style.borderColor = '#667eea';
+            uploadZone.style.background = '#f8f9ff';
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#667eea';
+            uploadZone.style.background = '#f8f9ff';
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            currentFile = file;
+            uploadZone.innerHTML = `
+                <div class="icon">✅</div>
+                <h3>已选择: ${file.name}</h3>
+                <p>点击"开始处理"按钮进行文档处理</p>
+            `;
+            processBtn.style.display = 'inline-flex';
+        }
+
+        processBtn.addEventListener('click', processDocument);
+
+        async function processDocument() {
+            if (!currentFile) return;
+
+            const loading = document.getElementById('loading');
+            const progressContainer = document.getElementById('progressContainer');
+            const resultPreview = document.getElementById('resultPreview');
+
+            loading.style.display = 'block';
+            progressContainer.style.display = 'block';
+            resultPreview.classList.remove('active');
+            processBtn.disabled = true;
+
+            resetProgress();
+
+            try {
+                const formData = new FormData();
+                formData.append('file', currentFile);
+                formData.append('summary_type', document.getElementById('summaryType').value);
+
+                simulateProgress();
+
+                const response = await fetch('/api/documents/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('step4').classList.add('completed');
+                    showResult(result);
+                    showToast('文档处理成功！', 'success');
+                } else {
+                    showToast(result.error || '处理失败', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('网络错误，请重试', 'error');
+            } finally {
+                loading.style.display = 'none';
+                processBtn.disabled = false;
+            }
+        }
+
+        function simulateProgress() {
+            setTimeout(() => document.getElementById('step1').classList.add('active'), 0);
+            setTimeout(() => {
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('active');
+            }, 1000);
+            setTimeout(() => {
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step2').classList.add('completed');
+                document.getElementById('step3').classList.add('active');
+            }, 2500);
+            setTimeout(() => {
+                document.getElementById('step3').classList.remove('active');
+                document.getElementById('step3').classList.add('completed');
+                document.getElementById('step4').classList.add('active');
+            }, 4500);
+        }
+
+        function resetProgress() {
+            for (let i = 1; i <= 4; i++) {
+                const step = document.getElementById('step' + i);
+                step.classList.remove('active', 'completed');
+            }
+        }
+
+        function showResult(result) {
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = `
+                <p><strong>文档ID:</strong> ${result.doc_id}</p>
+                <p><strong>分类:</strong> ${result.category}</p>
+                <p><strong>关键词:</strong> ${result.keywords ? result.keywords.join(', ') : '无'}</p>
+                <p><strong>处理耗时:</strong> ${result.duration_seconds ? result.duration_seconds.toFixed(2) + '秒' : 'N/A'}</p>
+                <p><strong>工作流ID:</strong> ${result.workflow_id}</p>
+            `;
+            document.getElementById('resultPreview').classList.add('active');
+        }
+
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/documents');
+                const result = await response.json();
+
+                const documentList = document.getElementById('documentList');
+
+                if (result.documents && result.documents.length > 0) {
+                    documentList.innerHTML = result.documents.map(doc => `
+                        <div class="document-item" onclick="showDocumentDetail('${doc.doc_id}')">
+                            <h4>${doc.metadata?.title || '未命名文档'}</h4>
+                            <div class="meta">
+                                <span>📁 ${doc.category || '未分类'}</span>
+                                <span>📅 ${doc.added_time ? new Date(doc.added_time).toLocaleDateString() : '未知'}</span>
+                            </div>
+                            <div class="keywords">
+                                ${(doc.keywords || []).slice(0, 5).map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    documentList.innerHTML = '<p style="color: #666; text-align: center; padding: 40px;">暂无文档，请先上传文档</p>';
+                }
+            } catch (error) {
+                console.error('Error loading documents:', error);
+            }
+        }
+
+        async function showDocumentDetail(docId) {
+            try {
+                const response = await fetch(`/api/documents/${docId}`);
+                const result = await response.json();
+
+                if (result.document) {
+                    const doc = result.document;
+                    const modalTitle = document.getElementById('modalTitle');
+                    const modalBody = document.getElementById('modalBody');
+
+                    modalTitle.textContent = doc.metadata?.title || '文档详情';
+
+                    modalBody.innerHTML = `
+                        <div class="detail-section">
+                            <h4>基本信息</h4>
+                            <p><strong>分类:</strong> ${doc.category || '未分类'}</p>
+                            <p><strong>研究方向:</strong> ${doc.tech_research_direction || '未确定'}</p>
+                            <p><strong>添加时间:</strong> ${doc.added_time ? new Date(doc.added_time).toLocaleString() : '未知'}</p>
+                        </div>
+
+                        <div class="detail-section">
+                            <h4>关键词</h4>
+                            <div class="keywords">
+                                ${(doc.keywords || []).map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <h4>结构化摘要</h4>
+                            <div class="abstract-preview">
+                                ${doc.structured_abstract?.full_abstract || '暂无摘要'}
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <h4>提取信息</h4>
+                            <p><strong>技术结论:</strong> ${doc.extracted_info?.technical_conclusions || '无'}</p>
+                            <p><strong>实验数据:</strong> ${doc.extracted_info?.experimental_data || '无'}</p>
+                            <p><strong>创新点:</strong> ${doc.extracted_info?.innovations || '无'}</p>
+                            <p><strong>待解决问题:</strong> ${doc.extracted_info?.open_problems || '无'}</p>
+                        </div>
+
+                        ${doc.related_documents && doc.related_documents.length > 0 ? `
+                        <div class="detail-section">
+                            <h4>关联文档</h4>
+                            ${doc.related_documents.slice(0, 5).map(r => `
+                                <div style="margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                                    <strong>${r.title}</strong>
+                                    <p style="font-size: 12px; color: #666;">相似度: ${(r.similarity_score * 100).toFixed(1)}%</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                    `;
+
+                    document.getElementById('documentModal').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error loading document detail:', error);
+                showToast('加载文档详情失败', 'error');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('documentModal').classList.remove('active');
+        }
+
+        document.getElementById('documentModal').addEventListener('click', (e) => {
+            if (e.target.id === 'documentModal') {
+                closeModal();
+            }
+        });
+
+        document.getElementById('searchBtn').addEventListener('click', searchDocuments);
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchDocuments();
+        });
+
+        async function searchDocuments() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            try {
+                const response = await fetch(`/api/documents/search?q=${encodeURIComponent(query)}`);
+                const result = await response.json();
+
+                const searchResults = document.getElementById('searchResults');
+
+                if (result.results && result.results.length > 0) {
+                    searchResults.innerHTML = result.results.map(doc => `
+                        <div class="document-item" onclick="showDocumentDetail('${doc.doc_id}')">
+                            <h4>${doc.metadata?.title || '未命名文档'}</h4>
+                            <div class="meta">
+                                <span>📁 ${doc.category || '未分类'}</span>
+                                <span>📅 ${doc.added_time ? new Date(doc.added_time).toLocaleDateString() : '未知'}</span>
+                            </div>
+                            <p style="color: #666; font-size: 13px; margin-top: 8px;">
+                                ${doc.structured_abstract?.full_abstract?.substring(0, 200) || ''}...
+                            </p>
+                            <div class="keywords" style="margin-top: 10px;">
+                                ${(doc.keywords || []).slice(0, 5).map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    searchResults.innerHTML = '<p style="color: #666; text-align: center; padding: 40px;">未找到匹配的文档</p>';
+                }
+            } catch (error) {
+                console.error('Error searching:', error);
+                showToast('搜索失败', 'error');
+            }
+        }
+
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/statistics');
+                const result = await response.json();
+
+                if (result.statistics) {
+                    const stats = result.statistics;
+                    document.getElementById('totalDocs').textContent = stats.total_documents || 0;
+                    document.getElementById('totalKeywords').textContent = stats.total_keywords || 0;
+                    document.getElementById('avgKeywords').textContent = (stats.avg_keywords_per_doc || 0).toFixed(1);
+
+                    const categoryChart = document.getElementById('categoryChart');
+                    const categories = stats.categories || {};
+
+                    if (Object.keys(categories).length > 0) {
+                        const maxCount = Math.max(...Object.values(categories));
+
+                        categoryChart.innerHTML = Object.entries(categories)
+                            .sort((a, b) => b[1] - a[1])
+                            .map(([cat, count]) => `
+                                <div class="category-item">
+                                    <div class="category-name">${cat}</div>
+                                    <div class="category-bar-container">
+                                        <div class="category-bar" style="width: ${(count / maxCount * 100)}%"></div>
+                                    </div>
+                                    <div class="category-count">${count}</div>
+                                </div>
+                            `).join('');
+                    } else {
+                        categoryChart.innerHTML = '<p style="color: #666; text-align: center;">暂无分类数据</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        window.addEventListener('load', () => {
+            loadDocuments();
+            loadStatistics();
+        });
+    </script>
+</body>
+</html>
